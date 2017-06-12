@@ -116,8 +116,8 @@ class UploadResume extends MX_Controller {
 
 			$inputFieldValue =  $qualificationValues[$i]['value'];//gets per input field therefore group  them in fours
 
-			$X = $qualificationArrayCounter%4;
-			// echo "Modulus of ".$qualificationArrayCounter." % 4 is ".$X." <br/>";
+			$X = $qualificationArrayCounter%5;
+			// echo "Modulus of ".$qualificationArrayCounter." % 5 is ".$X." <br/>";
 			if($X == 0){
 				$specificqualificationValuesContainer['institution'] = $inputFieldValue;
 			}else if($X == 1){
@@ -125,11 +125,14 @@ class UploadResume extends MX_Controller {
 			}else if($X == 2){
 				$specificqualificationValuesContainer['description'] = $inputFieldValue;
 			}else if($X == 3){
-				$specificqualificationValuesContainer['yearsCompleted'] = $inputFieldValue;
+				$dateData = $this->DateFormater($qualificationValues[$i]['value'],$qualificationValues[$i+1]['value']);
+				$specificqualificationValuesContainer['yearsCompleted'] = $dateData['yearsCompleted'];
+				$specificqualificationValuesContainer['fromDate'] = $dateData['from'];
+				$specificqualificationValuesContainer['toDate'] = $dateData['to'];
 			}
 			$qualificationArrayCounter++;
 
-			$modulus = $arrayCounter % 3;
+			$modulus = $arrayCounter % 4;
 			if($modulus == 0 && $arrayCounter != 0){
 				array_push($qualificationValuesContainer,$specificqualificationValuesContainer);
 				$arrayCounter = -1;
@@ -137,10 +140,10 @@ class UploadResume extends MX_Controller {
 			//groups of the qualifications in 4's
 			$arrayCounter++;
 		}
-
+		// die();
 		$qualificationValuesContainer = json_encode($qualificationValuesContainer);
 		$email = $this->session->userdata('Email');
-		
+		// echo"<pre>";print_r($qualificationValuesContainer);die();
 		$curl = curl_init();
 		curl_setopt_array($curl, array(
 		    CURLOPT_RETURNTRANSFER => 1,
@@ -160,6 +163,42 @@ class UploadResume extends MX_Controller {
 		echo $result;
 	}
 
+	function DateFormater($From,$To)
+	{
+		$from = explode("/", $From);
+		$fromMonth = $from[0];
+		$fromYear = $from[2];
+		$fromDate = $from[2].'-'.$from[0].'-'.$from[1];
+
+		$to = explode("/", $To);
+		$toMonth = $to[0];
+		$toYear = $to[2];
+		$toDate = $to[2].'-'.$to[0].'-'.$to[1];
+
+		if ($toYear>$fromYear)
+		{
+			if ($toMonth>$fromMonth) {
+				$yearsComp = ((int) $toYear-(int) $fromYear)+(((int) $toMonth - (int) $fromMonth)/12);
+			} else if ($toMonth<$fromMonth) {
+				$yearsComp = ((int) $toYear-(int) $fromYear)+((12 - ((int)$fromMonth) - (int) $toMonth)/12);
+			}else {
+				$yearsComp = ((int) $toYear-(int) $fromYear);
+			}
+		}else if($toYear == $fromYear)
+		{
+			if ($toMonth==$fromMonth) {
+				$yearsComp = (1/12);
+			}else if ($toMonth>$fromMonth) {
+				$yearsComp = (((int) $toMonth - (int) $fromMonth)/12);
+			}else {
+				$yearsComp = "The have provided inconsistent data";
+			}
+		}
+		return array( 'yearsCompleted' => round($yearsComp,2),
+			'from' => $fromDate,
+			'to' => $toDate);
+	}
+
 	public function saveEmploymentHistoryDetails(){
 		$employmentHistoryVAlues = $_POST['employmentHistoryFormValues'];
 
@@ -172,7 +211,7 @@ class UploadResume extends MX_Controller {
 
 			$inputFieldValue =  $employmentHistoryVAlues[$i]['value'];//gets per input field therefore group  them in fours
 
-			$X = $employmentHistoryArrayCounter%4;//get the modulus of the number on input fields
+			$X = $employmentHistoryArrayCounter%5;//get the modulus of the number on input fields
 			//echo "Modulus of ".$employmentHistoryArrayCounter." % 4 is ".$X." <br/>";
 			if($X == 0){
 				$specificEmploymentHistoryVAluesContainer['institution'] = $inputFieldValue;//first input field
@@ -181,11 +220,14 @@ class UploadResume extends MX_Controller {
 			}else if($X == 2){
 				$specificEmploymentHistoryVAluesContainer['responsibilities'] = $inputFieldValue;//third input field
 			}else if($X == 3){
-				$specificEmploymentHistoryVAluesContainer['yearsCompleted'] = $inputFieldValue;//fourth input field
+				$dateData = $this->DateFormater($employmentHistoryVAlues[$i]['value'],$employmentHistoryVAlues[$i+1]['value']);
+				$specificEmploymentHistoryVAluesContainer['yearsCompleted'] = $dateData['yearsCompleted'];
+				$specificEmploymentHistoryVAluesContainer['fromDate'] = $dateData['from'];
+				$specificEmploymentHistoryVAluesContainer['toDate'] = $dateData['to'];
 			}
 			$employmentHistoryArrayCounter++;
 
-			$modulus = $arrayCounter % 3;
+			$modulus = $arrayCounter % 4;
 			if($modulus == 0 && $arrayCounter != 0){
 				array_push($employmentHistoryVAluesContainer,$specificEmploymentHistoryVAluesContainer);
 				$arrayCounter = -1;
@@ -195,7 +237,7 @@ class UploadResume extends MX_Controller {
 		}
 		$employmentHistoryVAluesContainer = json_encode($employmentHistoryVAluesContainer);
 		$email = $this->session->userdata('Email');
-		
+		// echo "<pre>";print_r($employmentHistoryVAluesContainer);die();
 		$curl = curl_init();
 		curl_setopt_array($curl, array(
 		    CURLOPT_RETURNTRANSFER => 1,
@@ -333,6 +375,55 @@ class UploadResume extends MX_Controller {
 
 	//uploads teh CV to the server
 	public function saveCV(){
+		$fileName = $_FILES["documentsCV"]["name"];// stores the original filename from the client
+		$fileType = $_FILES["documentsCV"]["type"];// stores the file’s mime-type
+		$fileSize = $_FILES["documentsCV"]["size"];// stores the file’s size (in bytes)
+		$tmpName = $_FILES["documentsCV"]["tmp_name"]; //tempName
+		$fileError = $_FILES["documentsCV"]["error"];
+		$uploadLocation = "C:\\xampp\\htdocs\\recruit\\assets\\uploads";//base_url('assets/uploads');
+		$URLToFileLocation = '169.239.252.31:8080/assets/uploads';
+
+		$fileName = preg_replace("/[^A-Z0-9._-]/i", "_", $fileName);
+		$fileNameArray = explode(".", $fileName);// ensure a safe filename
+		// if (!empty($_FILES["documentsCV"])) {
+
+			// $fileType = $fileNameArray[1];
+			// print_r($fileType."File type");die;
+			// $allowed = array("docx", "doc", "pdf");
+			// if (!in_array($fileType, $allowed)) {
+			// 	$response['message'] = "Invalid File Type";
+			// 	$response['status'] = 1;
+			// }else{
+	    		$randomNum = rand(999,999999);
+	    		$date = date('dmY');
+	    		$newFileName = $fileNameArray[0].$randomNum."CV_".$date.".".$fileNameArray[1];
+	    		$URLToFileLocation = $URLToFileLocation."/".$newFileName;
+			    // preserve file from temporary directory
+			    $success = move_uploaded_file($tmpName,$uploadLocation ."/". $newFileName);
+			    if (!$success) { 
+			    	$response['message'] = "Unable to save file.";
+					$response['status'] = 1;
+			        exit;
+			    }else{
+			    	$response['message'] = "Successfully Uploaded the CV.";
+					$response['status'] = 0;
+					//save the url to the DB
+					$userEmail = $this->session->userdata('Email');
+					$this->session->set_userdata('URLToCv', $URLToFileLocation);
+					//$return = $this->saveImagePathsToDB($URLToFileLocation, $userEmail);
+			    }
+			// }
+		// }else{
+		// 	$response['message'] = "Please select a file.";
+		// 	$response['status'] = 1;
+		// }
+
+		echo json_encode($response);
+	}
+	//uploads teh CV to the server
+
+	//uploads teh CV to the server
+	public function saveCert(){
 		$fileName = $_FILES["documentsCV"]["name"];// stores the original filename from the client
 		$fileType = $_FILES["documentsCV"]["type"];// stores the file’s mime-type
 		$fileSize = $_FILES["documentsCV"]["size"];// stores the file’s size (in bytes)
@@ -644,9 +735,43 @@ class UploadResume extends MX_Controller {
 		redirect(base_url('home/uploadResume'));
 	}
 
-	function test()
+	function test($data='01/04/2016',$data2='04/04/2017')
 	{
-		echo "<pre>";print_r($this->session->all_userdata());
+		$from = explode("/", $data);
+		$fromMonth = $from[0];
+		$fromYear = $from[2];
+		$fromDate = $from[2].'-'.$from[0].'-'.$from[1];
+
+		$to = explode("/", $data2);
+		$toMonth = $to[0];
+		$toYear = $to[2];
+		$toDate = $to[2].'-'.$to[0].'-'.$to[1];
+
+		if ($toYear>$fromYear)
+		{
+			if ($toMonth>$fromMonth) {
+				$yearsComp = ((int) $toYear-(int) $fromYear)+(((int) $toMonth - (int) $fromMonth)/12);
+			} else if ($toMonth<$fromMonth) {
+				$yearsComp = ((int) $toYear-(int) $fromYear)+((12 - ((int)$fromMonth) - (int) $toMonth)/12);
+			}else {
+				$yearsComp = ((int) $toYear-(int) $fromYear);
+			}
+		}else if($toYear == $fromYear)
+		{
+			if ($toMonth==$fromMonth) {
+				$yearsComp = (1/12);
+			}else if ($toMonth>$fromMonth) {
+				$yearsComp = (((int) $toMonth - (int) $fromMonth)/12);
+			}else {
+				$yearsComp = "The have provided inconsistent data";
+			}
+		}
+
+		echo(round($yearsComp,2));
+		echo "<br />";
+		echo($fromDate);
+		echo "<br />";
+		echo($toDate);
 	}
 }
 ?>

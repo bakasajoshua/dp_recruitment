@@ -266,6 +266,7 @@
 			} catch (SoapFault $e) {				
 			    $res = "Error: {$e->faultstring}";
 			}
+			// print_r($res);die();
 			echo $res->insertEmploymentHistoryDetailsResult;
 		}else if($action == "SAVEREFEREES"){
 			$referee = $_POST['referee'];

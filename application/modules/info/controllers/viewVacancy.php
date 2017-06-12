@@ -26,6 +26,7 @@ class ViewVacancy extends MX_Controller {
 		$data['vacancyQualificationDetails'] = $vacancyQualificationDetails;
 		$data['applied'] = $applied;
 		$this->validateCompetionOfCV($this->session->userdata('Email'),$this->session->userdata('cvComplete'));//checks if C.V is complete to as to allow user to apply for position
+		// echo "<pre>";print_r($data);die();
 		$data['content_view'] = 'info/ViewVacancy_v';
 		$this->load->view('template/template_v.php',$data);
 	}

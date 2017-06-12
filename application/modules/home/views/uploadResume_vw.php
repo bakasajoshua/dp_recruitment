@@ -395,10 +395,10 @@
                                     <div class="form-group">
                                        <p>Years Completed</p>
                                        <div class="col-sm-10">
-                                          <input type="number" name="years" min="1" value="" class="form-control" id="years" placeholder="Years"  style="width: 50%; display: inline-block;">
-                                          <!-- <input name="startDate" id="startDate" class="date-picker" placeholder="From:" style="margin-bottom: 1em;" />
+                                          <!-- <input type="number" name="years" min="1" value="" class="form-control" id="years" placeholder="Years"  style="width: 50%; display: inline-block;"> -->
+                                          <input name="startDate" id="startDate" class="date-picker" placeholder="From:" style="margin-bottom: 1em;" />
                                           <br />
-                                          <input name="endDate" id="endDate" class="date-picker" placeholder="To:" /> -->
+                                          <input name="endDate" id="endDate" class="date-picker" placeholder="To:" />
                                        </div>
                                     </div>
                                  </div>
@@ -476,8 +476,10 @@
                                     <div class="form-group">
                                        <p>Years</p>
                                        <div class="col-sm-10">
-                                          <input type="number" min="1" name="employmentYears[]" value="" class="form-control" id="employmentYears" placeholder="Years" style="width: 50%; display: inline-block;">
-                                          
+                                          <!-- <input type="number" min="1" name="employmentYears[]" value="" class="form-control" id="employmentYears" placeholder="Years" style="width: 50%; display: inline-block;"> -->
+                                          <input name="beginDate" id="beginDate" class="date-picker" placeholder="From:" style="margin-bottom: 1em;" />
+                                          <br />
+                                          <input name="finalDate" id="finalDate" class="date-picker" placeholder="To:" />
                                        </div>
                                     </div>
                                  </div>
@@ -650,7 +652,7 @@
 
 <script type="text/javascript">
    $( function() {
-      // $( ".date-picker" ).datepicker();
+      $( ".date-picker" ).datepicker();
    });
    $(document).ready(function(){
       $("#pdLabels").hide();
@@ -748,6 +750,7 @@
                                     {
                                         'qualificationsFormValues':$qualificationsFormValues
                                     },function(data, status){
+                                       console.log(data);
                                         if(data == "Inserted"){
                                             $message = "<center>";
                                                 $message += "<strong>Success.</strong> <br/> Successfully saved your qualification details.";

@@ -32,7 +32,7 @@
 							echo($vacancyDetails[0]->jobTitle);
 						?>
 					</h3>
-					<p>Join our Business intelligence team! </p>
+					<!-- <p>Join our Business intelligence team! </p> -->
 				</div><!-- /.the-job-title -->
 				<div class="the-job-company">
 					KIPPRA			
@@ -63,13 +63,13 @@
 		
 		<div class="the-job-aditional-details">
 			<span class="the-job-aditional-title job-cat-links">Category : 
-				<a href="http://zury.co.ke/kippra/job_category/accountingfinance/">Accounting/Finance</a>
+				<a href="#"><?= @$vacancyDetails[0]->orgDepartment; ?></a>
 			</span>
 		
 			<span class="the-job-aditional-title">
 				Salary : 
 				<?php 
-					Salary: echo $vacancyDetails[0]->salary;
+					Salary: echo number_format($vacancyDetails[0]->salary);
 				?>
 			</span>
 
